@@ -9,12 +9,23 @@ on:
   release:
     types: [published]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
+  # Workaround to pass variables to matrix strategy
+  # https://stackoverflow.com/a/77512339
+  variables:
+    name: Compute outputs
+    runs-on: ubuntu-latest
+    outputs:
+      registry: ghcr.io
+      image_name: ${{ github.repository }}
+    steps:
+      - name: Echo
+        if: false
+        run: echo "This step is never executed"
+
   build-push:
+    name: Build and push Docker image
+    needs: variables
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,15 +35,15 @@ jobs:
     strategy:
       matrix:
         release:
-          - name: "wine"
+          - name: 'wine'
             tags: |-
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wine-latest
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wine-${{ github.event.release.tag_name }}
-          - name: "proton"
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:wine-latest
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:wine-${{ github.event.release.tag_name }}
+          - name: 'proton'
             tags: |-
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:proton-latest
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:proton-${{ github.event.release.tag_name }}
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:latest
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:proton-latest
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:proton-${{ github.event.release.tag_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -45,10 +56,10 @@ jobs:
 
       # Login into Docker registry
       # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
+      - name: Log into registry ${{ needs.variables.outputs.registry }}
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ needs.variables.outputs.registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -58,8 +69,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.4.7
         with:
-          context: ./container/${{ matrix.release.name }}
-          file: ./container/${{ matrix.release.name }}/Dockerfile
+          context: container/${{ matrix.release.name }}
+          file: container/${{ matrix.release.name }}/Dockerfile
           push: true
           tags: ${{ matrix.release.tags }}
           cache-from: type=gha
