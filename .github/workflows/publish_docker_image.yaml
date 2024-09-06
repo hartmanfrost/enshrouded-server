@@ -1,0 +1,77 @@
+name: Publish Docker image
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    strategy:
+      matrix:
+        release:
+          - name: "wine"
+            tags: |-
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wine-latest
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wine-${{ github.event.release.tag_name }}
+          - name: "proton"
+            tags: |-
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:proton-latest
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:proton-${{ github.event.release.tag_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+
+      # Login into Docker registry
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image with Buildx
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.4.7
+        with:
+          context: ./container/${{ matrix.release.name }}
+          file: ./container/${{ matrix.release.name }}/Dockerfile
+          push: true
+          tags: ${{ matrix.release.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Generate and push provenance attestation for the built Docker image
+      # This step uses the GitHub-provided action to create a build provenance attestation
+      # The attestation includes details about the image build process and is signed
+      # It is then pushed to the container registry alongside the image
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
+        with:
+          subject-path: ${{ matrix.release.tags}}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+          push-to-registry: true
