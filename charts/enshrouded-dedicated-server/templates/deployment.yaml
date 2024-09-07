@@ -40,9 +40,9 @@ spec:
           fsGroup: 10000
         securityContext:
           allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
+          # capabilities:
+          #   drop:
+          #   - ALL
         resources:
           {{ toYaml .Values.resources | nindent 10 }}
         env:
