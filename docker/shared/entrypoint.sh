@@ -115,7 +115,7 @@ jq --arg serverName "$SERVER_NAME" \
     .userGroups |= map(
         if .name == "Default" then .password = $userPassword
         else if .name == "Admin" then .password = $adminPassword
-        else . end
+        else . end end
     )
   ' "${ENSHROUDED_CONFIG}" > "$tmpfile" && mv "$tmpfile" "$ENSHROUDED_CONFIG"
 
