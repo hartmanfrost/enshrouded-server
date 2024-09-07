@@ -3,6 +3,7 @@ FROM debian:12-slim
 ARG CONTAINER_GID=10000
 ARG CONTAINER_UID=10000
 
+ENV RUNTIME="wine"
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV ENSHROUDED_PATH="/home/steam/enshrouded"
 ENV ENSHROUDED_CONFIG="${ENSHROUDED_PATH}/enshrouded_server.json"
