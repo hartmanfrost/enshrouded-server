@@ -25,6 +25,8 @@ volumes:
 config:
   # -- Server name
   serverName: "Enshrouded Server"
+  # -- Server IP
+  serverIP: "127.0.0.1"
   # -- Server password. If not set, password will be generated randomly.
   userPassword: ""
   # -- Admin password. If not set, password will be generated randomly.

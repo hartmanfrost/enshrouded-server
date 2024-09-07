@@ -48,6 +48,8 @@ spec:
         env:
         - name: SERVER_NAME
           value: {{ .Values.config.serverName | squote }}
+        - name: SERVER_IP
+          value: {{ .Values.config.serverIP | squote }}
         - name: SERVER_USER_PASSWORD
           valueFrom:
             secretKeyRef:

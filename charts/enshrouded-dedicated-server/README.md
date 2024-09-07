@@ -13,6 +13,7 @@ Enshrouded dedicated server.
 | config.adminPassword | string | `""` | Admin password. If not set, password will be generated randomly. |
 | config.gamePort | int | `15636` |  |
 | config.queryPort | int | `15637` |  |
+| config.serverIP | string | `"127.0.0.1"` | Server IP |
 | config.serverName | string | `"Enshrouded Server"` | Server name |
 | config.serverPasswordExistingSecretName | string | `""` | Existing secret name for server password. Must contain key named "password". If set `serverPassword` will be ignored. |
 | config.serverSlots | int | `16` | Number of server slots |
