@@ -33,7 +33,6 @@ The `latest` tag is now based on the Proton build instead of Wine. This should b
 | QUERY_PORT | Port for steam query of server | 15637 | False |
 | SERVER_SLOTS | Number of slots for connections (Max 16) | 16 | False |
 | SERVER_IP | IP address for server to listen on | 0.0.0.0 | False |
-| VALIDATE | Validate the server files if set | None | False |
 
 **Note:** SERVER_IP is ignored if using Helm because that isn't how Kubernetes works.
 

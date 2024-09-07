@@ -64,8 +64,6 @@ spec:
           value: {{ .Values.config.queryPort | squote }}
         - name: SERVER_SLOTS
           value: {{ .Values.config.serverSlots | squote }}
-        - name: VALIDATE
-          value: {{ .Values.config.validate | squote }}
         ports:
         - name: game-port
           containerPort: {{ .Values.config.gamePort | int }}

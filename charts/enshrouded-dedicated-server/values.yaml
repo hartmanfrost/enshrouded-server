@@ -35,4 +35,3 @@ config:
   queryPort: 15637
   # -- Number of server slots
   serverSlots: 16
-  validate: ''

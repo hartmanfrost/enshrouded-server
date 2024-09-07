@@ -56,20 +56,12 @@ if [ -z "$SERVER_IP" ]; then
     echo "$(timestamp) WARN: SERVER_IP not set, using default: 0.0.0.0"
 fi
 
-if [ -z "$VALIDATE" ]; then
-    VALIDATE=''
-    echo "$(timestamp) WARN: VALIDATE not set, skipping validation"
-else
-    echo "$(timestamp) INFO: VALIDATE set, validating server files"
-    VALIDATE='+validate'
-fi
-
 # Install/Update Enshrouded
 echo "$(timestamp) INFO: Updating Enshrouded Dedicated Server"
 if [ "$RUNTIME" == "wine" ]; then
-    /home/steam/steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${VALIDATE} +quit ${STEAM_APP_ID}
+    /home/steam/steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update +validate +quit ${STEAM_APP_ID}
 elif [ "$RUNTIME" == "proton" ]; then
-    steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous app_update ${VALIDATE} +quit ${STEAM_APP_ID}
+    steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update +validate +quit ${STEAM_APP_ID}
 fi
 
 # Check that steamcmd was successful
