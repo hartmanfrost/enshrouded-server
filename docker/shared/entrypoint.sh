@@ -69,7 +69,7 @@ echo "$(timestamp) INFO: Updating Enshrouded Dedicated Server"
 if [ "$RUNTIME" == "wine" ]; then
     /home/steam/steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${VALIDATE} +quit ${STEAM_APP_ID}
 elif [ "$RUNTIME" == "proton" ]; then
-    steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${VALIDATE} +quit ${STEAM_APP_ID}
+    steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous app_update ${VALIDATE} +quit ${STEAM_APP_ID}
 fi
 
 # Check that steamcmd was successful
