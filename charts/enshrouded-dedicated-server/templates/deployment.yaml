@@ -48,11 +48,16 @@ spec:
         env:
         - name: SERVER_NAME
           value: {{ .Values.config.serverName | squote }}
-        - name: SERVER_PASSWORD
+        - name: SERVER_USER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "enshrouded.passwordSecretName" . }}
-              key: serverPassword
+              key: userPassword
+        - name: SERVER_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "enshrouded.passwordSecretName" . }}
+              key: adminPassword
         - name: GAME_PORT
           value: {{ .Values.config.gamePort | squote }}
         - name: QUERY_PORT
