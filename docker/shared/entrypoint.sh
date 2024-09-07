@@ -1,5 +1,4 @@
 #!/bin/bash
-set -exo pipefail
 
 # Quick function to generate a timestamp
 timestamp () {
