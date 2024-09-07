@@ -60,8 +60,8 @@ RUN mkdir "$ENSHROUDED_PATH" \
     && tar -x -C "${STEAM_PATH}/compatibilitytools.d/" -f "/home/steam/GE-Proton${GE_PROTON_VERSION}.tgz" \
     && rm "/home/steam/GE-Proton${GE_PROTON_VERSION}.tgz"
     
-COPY ../shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
-COPY ../shared/entrypoint.sh /home/steam/entrypoint.sh
+COPY shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
+COPY shared/entrypoint.sh /home/steam/entrypoint.sh
 
 WORKDIR /home/steam
 
