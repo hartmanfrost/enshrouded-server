@@ -15,13 +15,24 @@ shutdown () {
 trap 'shutdown' TERM
 
 # Validate arguments
+if [ -z "$RUNTIME" ]; then
+    echo "$(timestamp) ERROR: RUNTIME not set, exiting"
+    exit 1
+else
+    echo "$(timestamp) INFO: Using runtime: $RUNTIME"
+fi
+
 if [ -z "$SERVER_NAME" ]; then
     SERVER_NAME='Enshrouded Containerized'
     echo "$(timestamp) WARN: SERVER_NAME not set, using default: Enshrouded Containerized"
 fi
 
-if [ -z "$SERVER_PASSWORD" ]; then
-    echo "$(timestamp) WARN: SERVER_PASSWORD not set, server will be open to the public"
+if [ -z "$SERVER_USER_PASSWORD" ]; then
+    echo "$(timestamp) WARN: $SERVER_USER_PASSWORD not set, server will be passwordless"
+fi
+
+if [ -z "$SERVER_ADMIN_PASSWORD" ]; then
+    echo "$(timestamp) WARN: $SERVER_ADMIN_PASSWORD not set, server will be passwordless"
 fi
 
 if [ -z "$GAME_PORT" ]; then
@@ -44,9 +55,21 @@ if [ -z "$SERVER_IP" ]; then
     echo "$(timestamp) WARN: SERVER_IP not set, using default: 0.0.0.0"
 fi
 
+if [ -z "$VALIDATE" ]; then
+    VALIDATE=''
+    echo "$(timestamp) WARN: VALIDATE not set, skipping validation"
+else
+    echo "$(timestamp) INFO: VALIDATE set, validating server files"
+    VALIDATE='+validate'
+fi
+
 # Install/Update Enshrouded
 echo "$(timestamp) INFO: Updating Enshrouded Dedicated Server"
-steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${STEAM_APP_ID} validate +quit
+if [ "$RUNTIME" == "wine" ]; then
+    /home/steam/steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${VALIDATE} +quit ${STEAM_APP_ID}
+elif [ "$RUNTIME" == "proton" ]; then
+    steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$ENSHROUDED_PATH" +login anonymous +app_update ${VALIDATE} +quit ${STEAM_APP_ID}
+fi
 
 # Check that steamcmd was successful
 if [ $? != 0 ]; then
@@ -75,14 +98,27 @@ rm "${ENSHROUDED_PATH}/savegame/test"
 # Modify server config to match our arguments
 echo "$(timestamp) INFO: Updating Enshrouded Server configuration"
 tmpfile=$(mktemp)
-jq --arg n "$SERVER_NAME" '.name = $n' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
-if [ -n "$SERVER_PASSWORD" ]; then
-    jq --arg p "$SERVER_PASSWORD" '.userGroups[].password = $p' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
-fi
-jq --arg g "$GAME_PORT" '.gamePort = ($g | tonumber)' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
-jq --arg q "$QUERY_PORT" '.queryPort = ($q | tonumber)' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
-jq --arg s "$SERVER_SLOTS" '.slotCount = ($s | tonumber)' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
-jq --arg i "$SERVER_IP" '.ip = $i' ${ENSHROUDED_CONFIG} > "$tmpfile" && mv "$tmpfile" $ENSHROUDED_CONFIG
+jq --arg serverName "$SERVER_NAME" \
+   --arg userPassword "$SERVER_USER_PASSWORD" \
+   --arg adminPassword "$SERVER_ADMIN_PASSWORD" \
+   --arg gamePort "$GAME_PORT" \
+   --arg queryPort "$QUERY_PORT" \
+   --arg slotCount "$SERVER_SLOTS" \
+   --arg serverIp "$SERVER_IP" \
+   --indent 2 \
+  '
+    .name = $serverName |
+    .gamePort = ($gamePort | tonumber) |
+    .queryPort = ($queryPort | tonumber) |
+    .slotCount = ($slotCount | tonumber) |
+    .ip = $serverIp |
+    .userGroups |= map(
+        if .name == "Default" then .password = $userPassword
+        else if .name == "Admin" then .password = $adminPassword
+        else . end
+    )
+  ' "${ENSHROUDED_CONFIG}" > "$tmpfile" && mv "$tmpfile" "$ENSHROUDED_CONFIG"
+
 
 # Wine talks too much and it's annoying
 export WINEDEBUG=-all
@@ -103,13 +139,17 @@ ln -sf /proc/1/fd/1 "${ENSHROUDED_PATH}/logs/enshrouded_server.log"
 # Launch Enshrouded
 echo "$(timestamp) INFO: Starting Enshrouded Dedicated Server"
 
-${STEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton run ${ENSHROUDED_PATH}/enshrouded_server.exe &
+if [ "$RUNTIME" == "wine" ]; then
+    wine ${ENSHROUDED_PATH}/enshrouded_server.exe &
+elif [ "$RUNTIME" == "proton" ]; then
+    ${STEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton run ${ENSHROUDED_PATH}/enshrouded_server.exe &
+fi
 
 # Find pid for enshrouded_server.exe
 timeout=0
 while [ $timeout -lt 11 ]; do
-    if ps -e | grep "enshrouded_serv"; then
-        enshrouded_pid=$(ps -e | grep "enshrouded_serv" | awk '{print $1}')
+    if ps -e | grep "enshrouded_server"; then
+        enshrouded_pid=$(ps -e | grep "enshrouded_server" | awk '{print $1}')
         break
     elif [ $timeout -eq 10 ]; then
         echo "$(timestamp) ERROR: Timed out waiting for enshrouded_server.exe to be running"

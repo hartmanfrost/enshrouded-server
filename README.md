@@ -27,11 +27,13 @@ The `latest` tag is now based on the Proton build instead of Wine. This should b
 | Name | Description | Default | Required |
 | ---- | ----------- | ------- | -------- |
 | SERVER_NAME | Name for the Server | Enshrouded Containerized | False |
-| SERVER_PASSWORD | Password for the server | None | False |
+| SERVER_USER_PASSWORD | Password for the server | None | False |
+| SERVER_ADMIN_PASSWORD | Password for the admin | None | False |
 | GAME_PORT | Port for server connections | 15636 | False |
 | QUERY_PORT | Port for steam query of server | 15637 | False |
 | SERVER_SLOTS | Number of slots for connections (Max 16) | 16 | False |
 | SERVER_IP | IP address for server to listen on | 0.0.0.0 | False |
+| VALIDATE | Validate the server files if set | None | False |
 
 **Note:** SERVER_IP is ignored if using Helm because that isn't how Kubernetes works.
 
@@ -49,7 +51,8 @@ docker run \
   --publish 15637:15637/udp \
   --env=SERVER_NAME='Enshrouded Containerized Server' \
   --env=SERVER_SLOTS=16 \
-  --env=SERVER_PASSWORD='ChangeThisPlease' \
+  --env=SERVER_USER_PASSWORD='ChangeThisPlease' \
+  --env=SERVER_ADMIN_PASSWORD='ChangeThisPlease2' \
   --env=GAME_PORT=15636 \
   --env=QUERY_PORT=15637 \
   sknnr/enshrouded-dedicated-server:latest
@@ -57,7 +60,7 @@ docker run \
 
 ### Docker Compose
 
-To use Docker Compose, either clone this repo or copy the `compose.yaml` file out of the `container` directory to your local machine. Edit the compose file to change the environment variables to the values you desire and then save the changes. Once you have made your changes, from the same directory that contains the compose and the env files, simply run:
+To use Docker Compose, either clone this repo or copy the `docker-compose.yaml` file out of the `docker` directory to your local machine. Edit the compose file to change the environment variables to the values you desire and then save the changes. Once you have made your changes, from the same directory that contains the compose and the env files, simply run:
 
 ```bash
 docker-compose up -d
@@ -69,7 +72,7 @@ To bring the container down:
 docker-compose down
 ```
 
-compose.yaml file:
+docker-compose.yaml file:
 ```yaml
 services:
   enshrouded:
@@ -79,17 +82,19 @@ services:
       - "15637:15637/udp"
     environment:
       - SERVER_NAME=Enshrouded Containerized
-      - SERVER_PASSWORD=PleaseChangeMe
+      - SERVER_USER_PASSWORD=PleaseChangeMe
+      - SERVER_ADMIN_PASSWORD=PleaseChangeMe2
       - GAME_PORT=15636
       - QUERY_PORT=15637
       - SERVER_SLOTS=16
       - SERVER_IP=0.0.0.0
     volumes:
-      - enshrouded-persistent-data:/home/steam/enshrouded/savegame
+      - enshrouded-persistent-data:/home/steam/enshrouded
+      - enshrouded-savegame:/home/steam/enshrouded/savegame
 
 volumes:
   enshrouded-persistent-data:
-
+  enshrouded-savegame:
 ```
 
 ### Podman
@@ -98,15 +103,18 @@ To run the container in Podman, run the following command:
 
 ```bash
 podman volume create enshrouded-persistent-data
+podman volume create enshrouded-savegame
 podman run \
   --detach \
   --name enshrouded-server \
-  --mount type=volume,source=enshrouded-persistent-data,target=/home/steam/enshrouded/savegame \
+  --mount type=volume,source=enshrouded-persistent-data,target=/home/steam/enshrouded \
+  --mount type=volume,source=enshrouded-savegame,target=/home/steam/enshrouded/savegame \
   --publish 15636:15636/udp \
   --publish 15637:15637/udp \
   --env=SERVER_NAME='Enshrouded Containerized Server' \
   --env=SERVER_SLOTS=16 \
-  --env=SERVER_PASSWORD='ChangeThisPlease' \
+  --env=SERVER_USER_PASSWORD='ChangeThisPlease' \
+  --env=SERVER_ADMIN_PASSWORD='ChangeThisPlease2' \
   --env=GAME_PORT=15636 \
   --env=QUERY_PORT=15637 \
   docker.io/sknnr/enshrouded-dedicated-server:latest
@@ -124,7 +132,8 @@ Volume=enshrouded-persistent-data:/home/steam/enshrouded/savegame
 PublishPort=15636-15637:15636-15637/udp
 ContainerName=enshrouded-server
 Environment=SERVER_NAME="Enshrouded Containerized Server"
-Environment=SERVER_PASSWORD="ChangeThisPlease"
+Environment=SERVER_USER_PASSWORD="ChangeThisPlease"
+Environment=SERVER_ADMIN_PASSWORD="ChangeThisPlease2"
 Environment=GAME_PORT=15636
 Environment=QUERY_PORT=15637
 Environment=SERVER_SLOTS=16
@@ -142,7 +151,7 @@ WantedBy=multi-user.target default.target
 
 ### Kubernetes
 
-I've built a Helm chart and have included it in the `helm` directory within this repo. Modify the `values.yaml` file to your liking and install the chart into your cluster. Be sure to create and specify a namespace as I did not include a template for provisioning a namespace.
+I've built a Helm chart and have included it in the `charts` directory within this repo. Modify the `values.yaml` file to your liking and install the chart into your cluster. Be sure to create and specify a namespace as I did not include a template for provisioning a namespace.
 
 ## Troubleshooting
 
@@ -156,3 +165,36 @@ https://github.com/jsknnr/enshrouded-server/issues/16
 ### Storage
 
 I recommend having Docker or Podman manage the volume that gets mounted into the container. However, if you absolutely must bind mount a directory into the container you need to make sure that on your container host the directory you are bind mounting is owned by 10000:10000 by default (`chown -R 10000:10000 /path/to/directory`). If the ownership of the directory is not correct the container will not start as the server will be unable to persist the savegame.
+
+## Contributing
+
+### Hooks
+
+This part is also **required**. Thanks for all these tweaks, we have:
+
+1. Automated helm chart documentation generation
+2. Automated checks for secrets in the repository
+
+> How does it work?
+
+Git executes pre-commit program before every commit made locally, no matter are you going to push it or not. Pre-commit read content of `.pre-commit-config.yaml` file in the root of the repository and executes all hooks listed.
+
+### Installation procedure
+
+1. Install [pre-commit framework](https://pre-commit.com)
+2. Install [gitleaks](https://github.com/zricethezav/gitleaks)
+3. Install [helm-docs](https://github.com/norwoodj/helm-docs)
+4. Enable pre-commit hook in the repository
+    ```shell
+    pre-commit install
+    pre-commit install-hooks
+    ```
+5. Check that hooks work
+
+    You can either make a dummy commit, or execute the command below.
+
+    ```shell
+    pre-commit run -a
+    ```
+    
+    When some step is failed, you have to fix what it says or Git won't finish commit creation for you. In some cases there is nothing to fix. For example, docs hook have changed some README.md file because you changed variables description. Hook will be marked as failed because there is a new file that is to be included in the commit, but it won't be done implicit, you have to run *git commit* once again. On the second attempt it will pass without issues. So in this case, failure is not a failure, but a disclaimer that you have to add extra files to the commit.

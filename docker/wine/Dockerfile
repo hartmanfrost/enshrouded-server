@@ -37,9 +37,9 @@ RUN groupadd -g $CONTAINER_GID steam \
 
 USER steam
 
-COPY entrypoint.sh /home/steam/entrypoint.sh
+COPY ../shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
+COPY ../shared/entrypoint.sh /home/steam/entrypoint.sh
 COPY winetricks.sh /home/steam/winetricks.sh
-COPY enshrouded_server_example.json /home/steam/enshrouded_server_example.json
 
 RUN mkdir "$ENSHROUDED_PATH" \
     && mkdir "$ENSHROUDED_PATH"/savegame \

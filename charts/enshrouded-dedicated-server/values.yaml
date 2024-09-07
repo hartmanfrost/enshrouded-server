@@ -1,6 +1,6 @@
 image:
-  repository: sknnr/enshrouded-dedicated-server
-  tag: v2.0.5
+  repository: ghcr.io/hartmanfrost/enshrouded-server
+  tag: proton-v2.1.3
 
 service:
   type: LoadBalancer
@@ -9,23 +9,30 @@ service:
 
 resources:
   requests:
-    memory: 12G
+    memory: 6G
     cpu: 4.0
 
 volumes:
   dataPVC:
-    # -- Size of the persistent volume
-    size: 50Gi
-  storageClassName: ""
+    # -- Size of the persistent volume for gamedata
+    size: 30Gi
+    storageClassName: ""
+  savegamePVC:
+    # -- Size of the persistent volume for savegames
+    size: 10Gi
+    storageClassName: ""
 
 config:
   # -- Server name
   serverName: "Enshrouded Server"
   # -- Server password. If not set, password will be generated randomly.
-  serverPassword: ""
+  userPassword: ""
+  # -- Admin password. If not set, password will be generated randomly.
+  adminPassword: ""
   # -- Existing secret name for server password. Must contain key named "password". If set `serverPassword` will be ignored.
   serverPasswordExistingSecretName: ""
   gamePort: 15636
   queryPort: 15637
   # -- Number of server slots
   serverSlots: 16
+  validate: ''

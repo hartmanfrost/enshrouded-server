@@ -21,16 +21,30 @@ spec:
         app: "{{ .Chart.Name }}"
         release: "{{ .Release.Name }}"
     spec:
-      securityContext:
-        runAsUser: 10000
-        runAsGroup: 10000
-        fsGroup: 10000
+      initContainers:
+      - name: chown
+        image: busybox
+        command: ["chown", "-R", "10000:10000", "/home/steam/enshrouded"]
+        volumeMounts:
+        - name: data
+          mountPath: /home/steam/enshrouded
+        - name: savegame
+          mountPath: /home/steam/enshrouded/savegame
       containers:
       - name: "{{ .Chart.Name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
+        securityContext:
+          runAsUser: 10000
+          runAsGroup: 10000
+          fsGroup: 10000
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+          {{ toYaml .Values.resources | nindent 10 }}
         env:
         - name: SERVER_NAME
           value: {{ .Values.config.serverName | squote }}
@@ -45,6 +59,8 @@ spec:
           value: {{ .Values.config.queryPort | squote }}
         - name: SERVER_SLOTS
           value: {{ .Values.config.serverSlots | squote }}
+        - name: VALIDATE
+          value: {{ .Values.config.validate | squote }}
         ports:
         - name: game-port
           containerPort: {{ .Values.config.gamePort | int }}
@@ -54,11 +70,13 @@ spec:
           protocol: UDP
         volumeMounts:
         - name: data
+          mountPath: /home/steam/enshrouded
+        - name: savegame
           mountPath: /home/steam/enshrouded/savegame
-        securityContext:
-          allowPrivilegeEscalation: false
-          
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: "{{ .Chart.Name }}-data"
+      - name: savegame
+        persistentVolumeClaim:
+          claimName: "{{ .Chart.Name }}-savegame"
