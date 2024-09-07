@@ -3,11 +3,11 @@ FROM debian:12-slim
 ARG CONTAINER_GID=10000
 ARG CONTAINER_UID=10000
 
-ENV DEBIAN_FRONTEND "noninteractive"
-ENV ENSHROUDED_PATH "/home/steam/enshrouded"
-ENV ENSHROUDED_CONFIG "${ENSHROUDED_PATH}/enshrouded_server.json"
-ENV WINEPREFIX "/home/steam/.enshrouded_prefix"
-ENV WINEARCH "win64"
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV ENSHROUDED_PATH="/home/steam/enshrouded"
+ENV ENSHROUDED_CONFIG="${ENSHROUDED_PATH}/enshrouded_server.json"
+ENV WINEPREFIX="/home/steam/.enshrouded_prefix"
+ENV WINEARCH="win64"
 
 RUN groupadd -g $CONTAINER_GID steam \
     && useradd -g $CONTAINER_GID -u $CONTAINER_UID -m steam \
