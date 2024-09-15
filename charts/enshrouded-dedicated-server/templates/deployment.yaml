@@ -82,7 +82,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.ceserverTag }}"
         imagePullPolicy: Always
         ports:
-        - name: game-port
+        - name: ceserver-port
           containerPort: 52736
           protocol: TCP
       volumes:

@@ -32,3 +32,28 @@ spec:
     {{- end }}
   selector:
     app: "{{ .Chart.Name }}"
+---
+apiVersion: apps/v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-ceserver"
+  labels:
+    app: "{{ .Chart.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  {{- with .Values.service.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  {{- with .Values.service.externalIPs }}
+  externalIPs: {{ . | toYaml | nindent 4 }}
+  {{- end }}
+  ports:
+  - name: ceserver-port
+    port: 15638
+    targetPort: ceserver-port
+    protocol: TCP
+  selector:
+    app: "{{ .Chart.Name }}"
