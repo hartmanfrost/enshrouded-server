@@ -79,7 +79,7 @@ spec:
         - name: savegame
           mountPath: /home/steam/enshrouded/savegame
       - name: ceserver
-        image: "{{ .Values.image.repository }}:{{ .Values.image.ceserver-tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.ceserverTag }}"
         imagePullPolicy: Always
         ports:
         - name: game-port
