@@ -44,6 +44,10 @@ jobs:
               ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:latest
               ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:proton-latest
               ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:proton-${{ github.event.release.tag_name }}
+          - name: 'ceserver'
+            tags: |-
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:ceserver-latest
+              ${{ needs.variables.outputs.registry }}/${{ needs.variables.outputs.image_name }}:ceserver-${{ github.event.release.tag_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
