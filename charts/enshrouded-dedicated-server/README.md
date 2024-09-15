@@ -1,6 +1,6 @@
 # enshrouded-dedicated-server
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
 
 Enshrouded dedicated server.
 
@@ -18,8 +18,9 @@ Enshrouded dedicated server.
 | config.serverPasswordExistingSecretName | string | `""` | Existing secret name for server password. Must contain key named "password". If set `serverPassword` will be ignored. |
 | config.serverSlots | int | `16` | Number of server slots |
 | config.userPassword | string | `""` | Server password. If not set, password will be generated randomly. |
+| image.ceserver-tag | string | `"ceserver-v2.1.4"` |  |
 | image.repository | string | `"ghcr.io/hartmanfrost/enshrouded-server"` |  |
-| image.tag | string | `"proton-v2.1.3"` |  |
+| image.tag | string | `"proton-v2.1.4"` |  |
 | resources.requests.cpu | float | `4` |  |
 | resources.requests.memory | string | `"6G"` |  |
 | service.annotations | object | `{}` |  |
