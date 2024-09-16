@@ -39,10 +39,11 @@ spec:
           runAsGroup: 10000
           fsGroup: 10000
         securityContext:
-          allowPrivilegeEscalation: false
-          # capabilities:
-          #   drop:
-          #   - ALL
+          privileged: true
+          capabilities:
+            add:
+            - SYS_PTRACE
+            - SYS_ADMIN
         resources:
           {{ toYaml .Values.resources | nindent 10 }}
         env:
@@ -73,25 +74,14 @@ spec:
         - name: query-port
           containerPort: {{ .Values.config.queryPort | int }}
           protocol: UDP
+        - name: ceserver-port
+          containerPort: 52736
+          protocol: TCP
         volumeMounts:
         - name: data
           mountPath: /home/steam/enshrouded
         - name: savegame
           mountPath: /home/steam/enshrouded/savegame
-      - name: ceserver
-        image: "{{ .Values.image.repository }}:{{ .Values.image.ceserverTag }}"
-        imagePullPolicy: Always
-        ports:
-        - name: ceserver-port
-          containerPort: 52736
-          protocol: TCP
-        securityContext:
-          privileged: true
-          capabilities:
-            add:
-            - SYS_PTRACE
-            - SYS_ADMIN
-      shareProcessNamespace: true
       volumes:
       - name: data
         persistentVolumeClaim:

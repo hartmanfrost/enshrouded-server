@@ -1,3 +1,23 @@
+FROM ubuntu:24.04 AS ceserver-build
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        build-essential \
+        ca-certificates \
+        git \
+        zlib1g-dev
+
+WORKDIR /build
+
+RUN git clone -n --depth=1 --filter=tree:0 https://github.com/cheat-engine/cheat-engine.git . \
+    && git sparse-checkout set --no-cone "Cheat Engine/ceserver" \
+    && git checkout \
+    && make -C "Cheat Engine/ceserver/gcc"
+
+
+
 FROM debian:12-slim
 
 ARG CONTAINER_GID=10000
@@ -63,6 +83,10 @@ RUN mkdir "$ENSHROUDED_PATH" \
     
 COPY shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
 COPY shared/entrypoint.sh /home/steam/entrypoint.sh
+
+COPY --from=build ["/build/Cheat Engine/ceserver/gcc/ceserver", "/home/steam/"]
+
+EXPOSE 52736
 
 WORKDIR /home/steam
 

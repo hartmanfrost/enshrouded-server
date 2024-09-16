@@ -152,6 +152,11 @@ while [ $timeout -lt 11 ]; do
   echo "$(timestamp) INFO: Waiting for enshrouded_server.exe to be running"
 done
 
+# Run ceserver
+echo "$(timestamp) INFO: Starting seserver"
+wine ${ENSHROUDED_PATH}/ceserver &
+
+
 # Hold us open until we recieve a SIGTERM
 wait
 
