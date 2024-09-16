@@ -154,7 +154,7 @@ done
 
 # Run ceserver
 echo "$(timestamp) INFO: Starting seserver"
-/home/steam/ceserver &
+sudo --non-interactive /home/steam/ceserver &
 
 
 # Hold us open until we recieve a SIGTERM
