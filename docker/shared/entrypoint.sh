@@ -154,7 +154,7 @@ done
 
 # Run ceserver
 echo "$(timestamp) INFO: Starting seserver"
-${ENSHROUDED_PATH}/ceserver &
+/home/steam/ceserver &
 
 
 # Hold us open until we recieve a SIGTERM
