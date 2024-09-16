@@ -18,9 +18,9 @@ Enshrouded dedicated server.
 | config.serverPasswordExistingSecretName | string | `""` | Existing secret name for server password. Must contain key named "password". If set `serverPassword` will be ignored. |
 | config.serverSlots | int | `16` | Number of server slots |
 | config.userPassword | string | `""` | Server password. If not set, password will be generated randomly. |
-| image.ceserverTag | string | `"ceserver-v2.1.5"` |  |
+| image.ceserverTag | string | `"ceserver-v2.1.6"` |  |
 | image.repository | string | `"ghcr.io/hartmanfrost/enshrouded-server"` |  |
-| image.tag | string | `"proton-v2.1.5"` |  |
+| image.tag | string | `"proton-v2.1.6"` |  |
 | resources.requests.cpu | float | `4` |  |
 | resources.requests.memory | string | `"6G"` |  |
 | service.annotations | object | `{}` |  |
