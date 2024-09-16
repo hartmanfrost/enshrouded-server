@@ -154,7 +154,7 @@ done
 
 # Run ceserver
 echo "$(timestamp) INFO: Starting seserver"
-wine ${ENSHROUDED_PATH}/ceserver &
+${ENSHROUDED_PATH}/ceserver &
 
 
 # Hold us open until we recieve a SIGTERM
