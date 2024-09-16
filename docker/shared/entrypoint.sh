@@ -153,8 +153,8 @@ while [ $timeout -lt 11 ]; do
 done
 
 # Run ceserver
-echo "$(timestamp) INFO: Starting seserver"
-sudo --non-interactive /home/steam/ceserver &
+# echo "$(timestamp) INFO: Starting seserver"
+# sudo --non-interactive /home/steam/ceserver &
 
 
 # Hold us open until we recieve a SIGTERM
