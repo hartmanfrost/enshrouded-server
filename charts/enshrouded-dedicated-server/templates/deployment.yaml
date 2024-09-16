@@ -87,6 +87,10 @@ spec:
           protocol: TCP
         securityContext:
           privileged: true
+          capabilities:
+            add:
+            - SYS_PTRACE
+            - SYS_ADMIN
       volumes:
       - name: data
         persistentVolumeClaim:
