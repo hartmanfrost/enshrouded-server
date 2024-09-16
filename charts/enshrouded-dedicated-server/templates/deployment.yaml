@@ -85,6 +85,8 @@ spec:
         - name: ceserver-port
           containerPort: 52736
           protocol: TCP
+        securityContext:
+          privileged: true
       volumes:
       - name: data
         persistentVolumeClaim:
