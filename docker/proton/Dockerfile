@@ -37,7 +37,7 @@ ENV STEAM_COMPAT_DATA_PATH="${STEAM_PATH}/steamapps/compatdata/${STEAM_APP_ID}"
 ENV ULWGL_ID=0
 
 RUN groupadd -g $CONTAINER_GID steam \
-    && useradd --disabled-password --gecos -g $CONTAINER_GID -u $CONTAINER_UID -m steam \
+    && useradd -g $CONTAINER_GID -u $CONTAINER_UID -m steam \
     && usermod -aG sudo steam \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && sed -i 's#^Components: .*#Components: main non-free contrib#g' /etc/apt/sources.list.d/debian.sources \
