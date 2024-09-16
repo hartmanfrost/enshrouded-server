@@ -6,13 +6,16 @@ services:
       - "15637:15637/udp"
     environment:
       - SERVER_NAME=Enshrouded Containerized
-      - SERVER_PASSWORD=PleaseChangeMe
+      - SERVER_USER_PASSWORD=PleaseChangeMe
+      - SERVER_ADMIN_PASSWORD=PleaseChangeMe2
       - GAME_PORT=15636
       - QUERY_PORT=15637
       - SERVER_SLOTS=16
       - SERVER_IP=0.0.0.0
     volumes:
-      - enshrouded-persistent-data:/home/steam/enshrouded/savegame
+      - enshrouded-persistent-data:/home/steam/enshrouded
+      - enshrouded-savegame:/home/steam/enshrouded/savegame
 
 volumes:
   enshrouded-persistent-data:
+  enshrouded-savegame:

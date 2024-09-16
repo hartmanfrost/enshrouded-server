@@ -1,0 +1,37 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: "{{ .Chart.Name }}-data"
+  labels:
+    app: "{{ .Chart.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.dataPVC.size }}
+  {{- if ne .Values.volumes.dataPVC.storageClassName "" }}
+  storageClassName: {{ .Values.volumes.dataPVC.storageClassName }}
+  {{- end }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: "{{ .Chart.Name }}-savegame"
+  labels:
+    app: "{{ .Chart.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.savegamePVC.size }}
+  {{- if ne .Values.volumes.savegamePVC.storageClassName "" }}
+  storageClassName: {{ .Values.volumes.savegamePVC.storageClassName }}
+  {{- end }}

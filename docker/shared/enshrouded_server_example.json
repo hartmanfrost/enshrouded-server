@@ -48,6 +48,15 @@
       "canEditBase": true,
       "canExtendBase": true,
       "reservedSlots": 0
+    },
+    {
+      "name": "Admin",
+      "password": "password",
+      "canKickBan": true,
+      "canAccessInventories": true,
+      "canEditBase": true,
+      "canExtendBase": true,
+      "reservedSlots": 2
     }
   ]
 }

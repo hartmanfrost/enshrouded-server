@@ -1,19 +1,40 @@
+FROM ubuntu:24.04 AS ceserver-build
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        build-essential \
+        ca-certificates \
+        git \
+        zlib1g-dev
+
+WORKDIR /build
+
+RUN git clone -n --depth=1 --filter=tree:0 https://github.com/cheat-engine/cheat-engine.git . \
+    && git sparse-checkout set --no-cone "Cheat Engine/ceserver" \
+    && git checkout \
+    && make -C "Cheat Engine/ceserver/gcc"
+
+
+
 FROM debian:12-slim
 
 ARG CONTAINER_GID=10000
 ARG CONTAINER_UID=10000
 
-ENV DEBIAN_FRONTEND "noninteractive"
-ENV STEAM_APP_ID "2278520"
-ENV HOME "/home/steam"
-ENV STEAM_PATH "/home/steam/Steam"
-ENV ENSHROUDED_PATH "/home/steam/enshrouded"
-ENV ENSHROUDED_CONFIG "${ENSHROUDED_PATH}/enshrouded_server.json"
-ENV GE_PROTON_VERSION "8-30"
-ENV GE_PROTON_URL "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton${GE_PROTON_VERSION}/GE-Proton${GE_PROTON_VERSION}.tar.gz"
-ENV STEAM_COMPAT_CLIENT_INSTALL_PATH "$STEAM_PATH"
-ENV STEAM_COMPAT_DATA_PATH "${STEAM_PATH}/steamapps/compatdata/${STEAM_APP_ID}"
-ENV ULWGL_ID 0
+ENV RUNTIME="proton"
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV STEAM_APP_ID="2278520"
+ENV HOME="/home/steam"
+ENV STEAM_PATH="/home/steam/Steam"
+ENV ENSHROUDED_PATH="/home/steam/enshrouded"
+ENV ENSHROUDED_CONFIG="${ENSHROUDED_PATH}/enshrouded_server.json"
+ENV GE_PROTON_VERSION="8-30"
+ENV GE_PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton${GE_PROTON_VERSION}/GE-Proton${GE_PROTON_VERSION}.tar.gz"
+ENV STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_PATH"
+ENV STEAM_COMPAT_DATA_PATH="${STEAM_PATH}/steamapps/compatdata/${STEAM_APP_ID}"
+ENV ULWGL_ID=0
 
 RUN groupadd -g $CONTAINER_GID steam \
     && useradd -g $CONTAINER_GID -u $CONTAINER_UID -m steam \
@@ -60,8 +81,12 @@ RUN mkdir "$ENSHROUDED_PATH" \
     && tar -x -C "${STEAM_PATH}/compatibilitytools.d/" -f "/home/steam/GE-Proton${GE_PROTON_VERSION}.tgz" \
     && rm "/home/steam/GE-Proton${GE_PROTON_VERSION}.tgz"
     
-COPY entrypoint.sh /home/steam/entrypoint.sh
-COPY enshrouded_server_example.json /home/steam/enshrouded_server_example.json
+COPY shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
+COPY shared/entrypoint.sh /home/steam/entrypoint.sh
+
+COPY --from=ceserver-build ["/build/Cheat Engine/ceserver/gcc/ceserver", "/home/steam/"]
+
+EXPOSE 52736
 
 WORKDIR /home/steam
 

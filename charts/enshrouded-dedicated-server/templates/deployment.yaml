@@ -21,24 +21,46 @@ spec:
         app: "{{ .Chart.Name }}"
         release: "{{ .Release.Name }}"
     spec:
-      securityContext:
-        runAsUser: 10000
-        runAsGroup: 10000
-        fsGroup: 10000
+      initContainers:
+      - name: chown
+        image: busybox
+        command: ["chown", "-R", "10000:10000", "/home/steam/enshrouded"]
+        volumeMounts:
+        - name: data
+          mountPath: /home/steam/enshrouded
+        - name: savegame
+          mountPath: /home/steam/enshrouded/savegame
       containers:
       - name: "{{ .Chart.Name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
+        securityContext:
+          runAsUser: 10000
+          runAsGroup: 10000
+          fsGroup: 10000
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_PTRACE
+            - SYS_ADMIN
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+          {{ toYaml .Values.resources | nindent 10 }}
         env:
         - name: SERVER_NAME
           value: {{ .Values.config.serverName | squote }}
-        - name: SERVER_PASSWORD
+        - name: SERVER_IP
+          value: {{ .Values.config.serverIP | squote }}
+        - name: SERVER_USER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "enshrouded.passwordSecretName" . }}
-              key: serverPassword
+              key: userPassword
+        - name: SERVER_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "enshrouded.passwordSecretName" . }}
+              key: adminPassword
         - name: GAME_PORT
           value: {{ .Values.config.gamePort | squote }}
         - name: QUERY_PORT
@@ -52,13 +74,18 @@ spec:
         - name: query-port
           containerPort: {{ .Values.config.queryPort | int }}
           protocol: UDP
+        - name: ceserver-port
+          containerPort: 52736
+          protocol: TCP
         volumeMounts:
         - name: data
+          mountPath: /home/steam/enshrouded
+        - name: savegame
           mountPath: /home/steam/enshrouded/savegame
-        securityContext:
-          allowPrivilegeEscalation: false
-          
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: "{{ .Chart.Name }}-data"
+      - name: savegame
+        persistentVolumeClaim:
+          claimName: "{{ .Chart.Name }}-savegame"
