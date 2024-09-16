@@ -84,7 +84,7 @@ RUN mkdir "$ENSHROUDED_PATH" \
 COPY shared/enshrouded_server_example.json /home/steam/enshrouded_server_example.json
 COPY shared/entrypoint.sh /home/steam/entrypoint.sh
 
-COPY --from=build ["/build/Cheat Engine/ceserver/gcc/ceserver", "/home/steam/"]
+COPY --from=ceserver-build ["/build/Cheat Engine/ceserver/gcc/ceserver", "/home/steam/"]
 
 EXPOSE 52736
 
