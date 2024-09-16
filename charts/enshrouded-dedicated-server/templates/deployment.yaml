@@ -91,6 +91,8 @@ spec:
             add:
             - SYS_PTRACE
             - SYS_ADMIN
+      hostIPC: true
+      hostPID: true
       volumes:
       - name: data
         persistentVolumeClaim:
