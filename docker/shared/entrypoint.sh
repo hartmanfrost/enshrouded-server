@@ -126,7 +126,7 @@ if ! [ -f "${ENSHROUDED_PATH}/logs/enshrouded_server.log" ]; then
 fi
 
 # Link logfile to stdout of pid 1 so we can see logs
-ln -sf /proc/1/fd/1 "${ENSHROUDED_PATH}/logs/enshrouded_server.log"
+ln -sf /dev/stdout "${ENSHROUDED_PATH}/logs/enshrouded_server.log"
 
 # Launch Enshrouded
 echo "$(timestamp) INFO: Starting Enshrouded Dedicated Server"
